@@ -1,10 +1,14 @@
-import os
+from pydantic_settings import BaseSettings
 
-class Settings:
+class Settings(BaseSettings):
     PROJECT_NAME: str = "RoomieMatch Pro"
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./roomiematch.db")
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "super-secret-roomie-key")
+    # Essential production overrides via Environment Variables:
+    DATABASE_URL: str = "sqlite:///./roomiematch.db" # Default for local
+    SECRET_KEY: str = "super-secret-roomie-key-override-me-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 1 week
+
+    class Config:
+        env_file = ".env"
 
 settings = Settings()

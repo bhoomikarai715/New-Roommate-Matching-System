@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>RoomieMatch Pro | Smart Roommate Matching for Women</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+            min-height: 100vh;
+        }
+
+        /* Auth Modal */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .auth-card {
+            background: white;
+            max-width: 450px;
+            width: 90%;
+            padding: 2.5rem;
+            border-radius: 2rem;
+            text-align: center;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .auth-card i {
+            font-size: 3.5rem;
+            color: #db2777;
+            margin-bottom: 1rem;
+        }
+
+        .auth-card h2 {
+            font-size: 1.8rem;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-card p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .google-signin-btn {
+            background: white;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .google-signin-btn:hover {
+            border-color: #db2777;
+            box-shadow: 0 4px 12px rgba(219,39,119,0.1);
+        }
+
+        .demo-note {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 1rem;
+        }
+
+        /* Main App */
+        .main-app {
+            display: none;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #db2777, #be185d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #fbcfe8, #fce7f3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #db2777;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 8px;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #f3f4f6;
+            color: #db2777;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #fce7f3;
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 2rem;
+            transition: 0.2s;
+            color: #6b7280;
+        }
+
+        .tab.active {
+            background: #db2777;
+            color: white;
+        }
+
+        /* Profile Panel */
+        .profile-container {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .profile-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.85rem;
+        }
+
+        .form-group input, .form-group select {
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #db2777;
+            box-shadow: 0 0 0 2px rgba(219,39,119,0.1);
+        }
+
+        .room-preference-group {
+            background: #fef9fc;
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid #fce7f3;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .save-profile-btn {
+            background: #db2777;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: fit-content;
+        }
+
+        /* Matches Grid */
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .match-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+            border: 1px solid #fce7f3;
+        }
+
+        .match-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(219,39,119,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .compatibility {
+            background: #db2777;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .detail-item {
+            display: flex;
+            gap: 0.75rem;
+            margin: 0.75rem 0;
+            font-size: 0.85rem;
+            color: #4b5563;
+        }
+
+        .detail-icon {
+            width: 24px;
+            color: #db2777;
+        }
+
+        .chat-btn {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 10px;
+            background: #fce7f3;
+            border: none;
+            border-radius: 2rem;
+            color: #db2777;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .chat-btn:hover {
+            background: #db2777;
+            color: white;
+        }
+
+        /* Chat Modal */
+        .chat-modal {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .chat-modal.active {
+            display: flex;
+        }
+
+        .chat-header {
+            background: #db2777;
+            color: white;
+            padding: 1rem;
+            border-radius: 1rem 1rem 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages-area {
+            height: 300px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f9fafb;
+        }
+
+        .chat-message {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 1rem;
+            max-width: 85%;
+        }
+
+        .chat-message.sent {
+            background: #db2777;
+            color: white;
+            margin-left: auto;
+        }
+
+        .chat-message.received {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 0.75rem;
+            gap: 0.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            outline: none;
+        }
+
+        .chat-input-area button {
+            background: #db2777;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            cursor: pointer;
+        }
+
+        /* Community Chat */
+        .community-container {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .community-messages {
+            height: 400px;
+            overflow-y: auto;
+            background: #f9fafb;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .community-message {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            margin-bottom: 0.75rem;
+            border-left: 3px solid #db2777;
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: #db2777;
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .community-input {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .community-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 2rem;
+            outline: none;
+        }
+
+        .community-input button {
+            background: #db2777;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .download-agreement-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            color: #9ca3af;
+            font-size: 0.75rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #fce7f3;
+            color: #db2777;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Auth Modal -->
+<div id="authModal" class="auth-modal">
+    <div class="auth-card">
+        <i class="fas fa-female"></i>
+        <h2>RoomieMatch Pro</h2>
+        <p>Find your perfect roommate & living space</p>
+        
+        <div id="authForm" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <input type="text" id="authName" placeholder="Full Name (for register)" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; outline: none; width: 100%;">
+            <input type="email" id="authEmail" placeholder="Email" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; outline: none; width: 100%;">
+            <input type="password" id="authPassword" placeholder="Password" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; outline: none; width: 100%;">
+            
+            <button id="loginBtn" class="google-signin-btn" style="background:#db2777; color:white; border:none; margin-bottom: 5px;">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button id="registerBtn" class="google-signin-btn" style="margin-bottom: 5px;">
+                <i class="fas fa-user-plus"></i> Register
+            </button>
+        </div>
+
+        <div class="demo-note" id="authError" style="color: red; display: none;"></div>
+    </div>
+</div>
+
+<!-- Main App -->
+<div id="mainApp" class="main-app">
+    <div class="navbar">
+        <div class="logo">
+            <i class="fas fa-hand-peace"></i> RoomieMatch Pro
+        </div>
+        <div class="user-section">
+            <span id="userName"></span>
+            <div class="user-avatar" id="userAvatarBtn">
+                <i class="fas fa-user-edit"></i>
+            </div>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="profile">👤 My Profile</button>
+        <button class="tab" data-tab="matches">🎯 Matches</button>
+        <button class="tab" data-tab="community">💬 Community</button>
+    </div>
+
+    <button id="downloadAgreementBtn" class="download-agreement-btn">
+        <i class="fas fa-file-contract"></i> Download Roommate Agreement
+    </button>
+
+    <!-- Profile Panel -->
+    <div id="profilePanel">
+        <div class="profile-container">
+            <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-user-circle"></i> Your Living Preferences</h3>
+            <div class="profile-form">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Display Name</label>
+                    <input type="text" id="profileName" placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-briefcase"></i> Profession</label>
+                    <select id="profileProfession">
+                        <option value="Nurse">Nurse</option>
+                        <option value="Software Developer">Software Developer</option>
+                        <option value="Engineer">Engineer</option>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Student">Student</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Designer">Designer</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-moon"></i> Sleep Pattern</label>
+                    <select id="profileSleep">
+                        <option value="Early Bird (5-7 AM)">Early Bird (5-7 AM)</option>
+                        <option value="Morning (7-9 AM)">Morning (7-9 AM)</option>
+                        <option value="Evening (10-11 PM)">Evening (10-11 PM)</option>
+                        <option value="Night Owl (12-2 AM)">Night Owl (12-2 AM)</option>
+                        <option value="Flexible">Flexible</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-smile"></i> Personality</label>
+                    <select id="profilePersonality">
+                        <option value="Extrovert">Extrovert (Social, outgoing)</option>
+                        <option value="Introvert">Introvert (Reserved, enjoys alone time)</option>
+                        <option value="Ambivert">Ambivert (Balance of both)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-broom"></i> Cleanliness Style</label>
+                    <select id="profileCleanliness">
+                        <option value="Very Clean">Very Clean (Spotless always)</option>
+                        <option value="Organized">Organized (Tidy but not obsessive)</option>
+                        <option value="Moderate">Moderate (Average cleanliness)</option>
+                        <option value="Messy but Tidy">Messy but Tidy (Cluttered but clean)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-volume-up"></i> Noise Tolerance</label>
+                    <select id="profileNoise">
+                        <option value="Very Quiet">Very Quiet (Library vibes)</option>
+                        <option value="Quiet">Quiet (Minimal noise)</option>
+                        <option value="Moderate">Moderate (Normal living)</option>
+                        <option value="Lively">Lively (Social, music okay)</option>
+                        <option value="Party Friendly">Party Friendly (Weekend gatherings)</option>
+                    </select>
+                </div>
+                <div class="form-group room-preference-group">
+                    <label><i class="fas fa-bed"></i> Room Preference <span class="badge">New!</span></label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="roomType" value="single-bedded"> 🛏️ Single Bedded Room
+                        </label>
+                        <label>
+                            <input type="radio" name="roomType" value="studio"> 🏢 Studio Apartment
+                        </label>
+                        <label>
+                            <input type="radio" name="roomType" value="shared"> 🏠 Shared Room
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <button id="saveProfileBtn" class="save-profile-btn">
+                <i class="fas fa-save"></i> Save Profile & Update Matches
+            </button>
+        </div>
+    </div>
+
+    <!-- Matches Panel -->
+    <div id="matchesPanel" style="display: none;">
+        <div class="matches-grid" id="matchesGrid"></div>
+    </div>
+
+    <!-- Community Panel -->
+    <div id="communityPanel" style="display: none;">
+        <div class="community-container">
+            <h3 style="margin-bottom: 1rem;">
+                <i class="fas fa-users"></i> Community Safe Space
+            </h3>
+            <div id="communityMessages" class="community-messages"></div>
+            <div class="community-input">
+                <input type="text" id="communityInput" placeholder="Share something positive...">
+                <button id="sendCommunityBtn"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        🌸 Safe, supportive community for women | Single beds & studio options available
+    </div>
+</div>
+
+<!-- Chat Modal -->
+<div id="chatModal" class="chat-modal">
+    <div class="chat-header">
+        <span id="chatPartnerName">Chat</span>
+        <button id="closeChatBtn" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer;">✕</button>
+    </div>
+    <div id="chatMessages" class="chat-messages-area"></div>
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Type a message...">
+        <button id="sendChatBtn">Send</button>
+    </div>
+</div>
+
+<script src="frontend_script.js"></script>
+</body>
+</html>

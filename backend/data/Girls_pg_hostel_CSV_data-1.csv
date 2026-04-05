@@ -1,0 +1,6 @@
+user_name,work_shift,profession,personality,cleanliness,bedtime,wake_time,sleep_type,noise_preference,social_energy_rating
+Alice,Morning,Developer,Introvert,Organised,10 PM,6 AM,Light Sleeper,Quiet,4
+Betty,Evening,Nurse,Extrovert,Both,12 AM,8 AM,Heavy Sleeper,Noisy,9
+Chloe,Night,Supporting Staff,Ambivert,Messy,2 AM,10 AM,Heavy Sleeper,Noisy,7
+Diana,Morning,Customer Support,Extrovert,Organised,11 PM,7 AM,Light Sleeper,Quiet,8
+Emma,Morning,Developer,Introvert,Organised,10 PM,6 AM,Heavy Sleeper,Quiet,3

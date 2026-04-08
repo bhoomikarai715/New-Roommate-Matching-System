@@ -37,8 +37,10 @@ Base = declarative_base()
 
 if "sqlite" in db_url and os.environ.get("VERCEL"):
     try:
+        import backend.models.entities
         Base.metadata.create_all(bind=engine)
-    except Exception:
+    except Exception as e:
+        print(f"Table creation failed: {e}")
         pass
 
 def get_db():

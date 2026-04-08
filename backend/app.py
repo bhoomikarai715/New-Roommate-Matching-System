@@ -30,6 +30,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
+
+# Serve static files from the root directory
+# We determine the root directory relative to this file
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # Include Routers
 app.include_router(auth.router)
 app.include_router(profile.router)
@@ -37,6 +45,16 @@ app.include_router(matches.router)
 app.include_router(chat.router)
 app.include_router(agreement.router)
 
+# Mount static files (excluding /api which is handled by routers)
+app.mount("/static", StaticFiles(directory=base_dir), name="static")
+
 @app.get("/")
-def root():
-    return {"message": f"Welcome to {settings.PROJECT_NAME} API"}
+def serve_index():
+    return FileResponse(os.path.join(base_dir, "index.html"))
+
+@app.get("/{filename}")
+def serve_root_files(filename: str):
+    file_path = os.path.join(base_dir, filename)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    return {"error": "File not found"}

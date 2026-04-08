@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>RoomieMatch Pro | Smart Roommate Matching for Women</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -504,16 +508,11 @@
         <p>Find your perfect roommate & living space</p>
         
         <div id="authForm" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-            <input type="text" id="authName" placeholder="Full Name (for register)" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; outline: none; width: 100%;">
-            <input type="email" id="authEmail" placeholder="Email" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; outline: none; width: 100%;">
-            <input type="password" id="authPassword" placeholder="Password" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; outline: none; width: 100%;">
-            
-            <button id="loginBtn" class="google-signin-btn" style="background:#db2777; color:white; border:none; margin-bottom: 5px;">
-                <i class="fas fa-sign-in-alt"></i> Login
+            <button id="googleSignInBtn" class="google-signin-btn" style="background:#db2777; color:white; border:none; margin-bottom: 5px; font-size: 1rem; padding: 14px 20px;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 22px; height: 22px; background: white; border-radius: 50%; padding: 2px;">
+                Sign in with Google
             </button>
-            <button id="registerBtn" class="google-signin-btn" style="margin-bottom: 5px;">
-                <i class="fas fa-user-plus"></i> Register
-            </button>
+            <p style="font-size: 0.8rem; color: #9ca3af;">One-click sign in • No password needed</p>
         </div>
 
         <div class="demo-note" id="authError" style="color: red; display: none;"></div>

@@ -1,3 +1,17 @@
+// ========== FIREBASE CONFIG ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyCHDFY57yjIGznenbb1jbPAIa7AeDOif-U",
+  authDomain: "roomie-pro.firebaseapp.com",
+  projectId: "roomie-pro",
+  storageBucket: "roomie-pro.firebasestorage.app",
+  messagingSenderId: "672881551088",
+  appId: "1:672881551088:web:f235e404ed6eb6d5aa8435",
+  measurementId: "G-D9WMWXXRVR"
+};
+
+firebase.initializeApp(firebaseConfig);
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
 // ========== CONFIG ==========
 const API_URL = window.location.protocol === 'file:' || window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' ? 'http://127.0.0.1:8000/api' : '/api';
 let currentUser = null;
@@ -23,7 +37,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     
     const res = await fetch(`${API_URL}${endpoint}`, options);
     if (!res.ok) {
-        if (res.status === 401 && endpoint !== '/auth/login') {
+        if (res.status === 401 && endpoint !== '/auth/firebase') {
             signOut();
         }
         const err = await res.text();
@@ -55,45 +69,46 @@ async function init() {
     showAuthModal();
 }
 
-// ========== AUTH ==========
-async function login() {
-    const email = document.getElementById('authEmail').value;
-    const password = document.getElementById('authPassword').value;
+// ========== AUTH (Firebase Google Sign-In) ==========
+async function signInWithGoogle() {
     const errObj = document.getElementById('authError');
-    if (!email || !password) return errObj.innerText = "Email and Password required", errObj.style.display = 'block';
+    const btn = document.getElementById('googleSignInBtn');
     
     try {
-        const formData = new FormData();
-        formData.append('username', email);
-        formData.append('password', password);
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+        errObj.style.display = 'none';
         
-        const res = await apiCall('/auth/login', 'POST', formData);
+        // Open Google Sign-In popup
+        const result = await firebase.auth().signInWithPopup(googleProvider);
+        const firebaseUser = result.user;
+        
+        // Get the Firebase ID token
+        const idToken = await firebaseUser.getIdToken();
+        
+        // Send to our backend to create/find user and get our JWT
+        const res = await apiCall('/auth/firebase', 'POST', {
+            id_token: idToken,
+            full_name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+            email: firebaseUser.email
+        });
+        
         localStorage.setItem('roomie_token', res.access_token);
         errObj.style.display = 'none';
         
         await init(); // Reload user data
     } catch (e) {
-        errObj.innerText = "Login failed: Incorrect credentials";
-        errObj.style.display = 'block';
-    }
-}
-
-async function register() {
-    const name = document.getElementById('authName').value;
-    const email = document.getElementById('authEmail').value;
-    const password = document.getElementById('authPassword').value;
-    const errObj = document.getElementById('authError');
-    
-    if (!name || !email || !password) return errObj.innerText = "Name, Email, and Password required", errObj.style.display = 'block';
-    
-    try {
-        await apiCall('/auth/register', 'POST', { full_name: name, email, password });
-        errObj.style.display = 'none';
-        alert('Registration successful! Logging you in...');
-        await login();
-    } catch (e) {
-        errObj.innerText = "Registration failed: " + e.message;
-        errObj.style.display = 'block';
+        console.error("Google Sign-In failed:", e);
+        if (e.code === 'auth/popup-closed-by-user') {
+            // User closed the popup, not an error
+            errObj.style.display = 'none';
+        } else {
+            errObj.innerText = "Sign-in failed: " + (e.message || "Please try again");
+            errObj.style.display = 'block';
+        }
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 22px; height: 22px; background: white; border-radius: 50%; padding: 2px;"> Sign in with Google';
     }
 }
 
@@ -101,6 +116,8 @@ function signOut() {
     currentUser = null;
     userProfile = null;
     localStorage.removeItem('roomie_token');
+    // Also sign out from Firebase
+    firebase.auth().signOut().catch(() => {});
     showAuthModal();
 }
 
@@ -366,8 +383,7 @@ function switchTabs() {
 }
 
 // ========== EVENTS LISTENER HOOKUP ==========
-document.getElementById('loginBtn').addEventListener('click', login);
-document.getElementById('registerBtn').addEventListener('click', register);
+document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
 document.getElementById('logoutBtn').addEventListener('click', signOut);
 document.getElementById('downloadAgreementBtn').addEventListener('click', downloadAgreement);
 document.getElementById('saveProfileBtn').addEventListener('click', saveUserProfile);

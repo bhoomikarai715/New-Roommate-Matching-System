@@ -9,12 +9,16 @@ from backend.config import settings
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Create tables if they don't exist
-    Base.metadata.create_all(bind=engine)
-    
-    # Seed data
-    with SessionLocal() as db:
-        seed_database(db)
+    # Handle read-only filesystems in serverless environments (like Vercel)
+    try:
+        # Startup: Create tables if they don't exist
+        Base.metadata.create_all(bind=engine)
+        
+        # Seed data
+        with SessionLocal() as db:
+            seed_database(db)
+    except Exception as e:
+        print(f"Skipping database init in serverless environment: {e}")
         
     yield
     # Shutdown logic if any

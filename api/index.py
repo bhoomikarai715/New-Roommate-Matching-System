@@ -1,5 +1,5 @@
 try:
-    from backend.app import app
+    from server_app.app import app
 except Exception as e:
     import traceback
     from fastapi import FastAPI

@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 import jwt
 from jwt.exceptions import InvalidTokenError as JWTError
 import bcrypt
-from backend.models.database import get_db
-from backend.models.entities import User
-from backend.schemas.schemas import UserCreate, UserResponse, Token
-from backend.config import settings
+from server_app.models.database import get_db
+from server_app.models.entities import User
+from server_app.schemas.schemas import UserCreate, UserResponse, Token
+from server_app.config import settings
 
 # No complex backend crypto needed for demo - frontend verifies via Firebase
 from pydantic import BaseModel

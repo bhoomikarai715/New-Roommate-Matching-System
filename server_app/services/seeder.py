@@ -2,7 +2,7 @@ import csv
 import random
 import os
 from sqlalchemy.orm import Session
-from backend.models.entities import RoommateRecord
+from server_app.models.entities import RoommateRecord
 
 def seed_database(db: Session, csv_path: str = None):
     if csv_path is None:

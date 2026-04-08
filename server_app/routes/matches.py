@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from backend.models.database import get_db
-from backend.models.entities import User, RoommateRecord
-from backend.schemas.schemas import RoommateMatchResponse
-from backend.routes.auth import get_current_user
-from backend.services.matching import calculate_compatibility
+from server_app.models.database import get_db
+from server_app.models.entities import User, RoommateRecord
+from server_app.schemas.schemas import RoommateMatchResponse
+from server_app.routes.auth import get_current_user
+from server_app.services.matching import calculate_compatibility
 
 router = APIRouter(prefix="/api/matches", tags=["matches"])
 
@@ -26,7 +26,7 @@ def get_matches(
         
     candidates = query.all()
     
-    from backend.services.ai_service import calculate_ai_compatibility
+    from server_app.services.ai_service import calculate_ai_compatibility
     
     matches = []
     for candidate in candidates:

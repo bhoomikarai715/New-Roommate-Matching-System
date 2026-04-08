@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 from datetime import datetime
-from backend.models.entities import User
-from backend.routes.auth import get_current_user
+from server_app.models.entities import User
+from server_app.routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/agreement", tags=["agreement"])
 

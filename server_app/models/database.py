@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-from backend.config import settings
+from server_app.config import settings
 
 import os
 import shutil
@@ -30,7 +30,7 @@ engine = create_engine(
     poolclass=StaticPool if db_url == "sqlite:///:memory:" else None
 )
 
-from backend.models.base import Base
+from server_app.models.base import Base
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -39,11 +39,11 @@ def init_db():
     if "sqlite" in db_url and os.environ.get("VERCEL"):
         try:
             # Import entities here to avoid circular imports and ensure tables are indexed
-            import backend.models.entities
+            import server_app.models.entities
             Base.metadata.create_all(bind=engine)
             
             # Seed the database dynamically for the in-memory SQLite
-            from backend.services.seeder import seed_database
+            from server_app.services.seeder import seed_database
             with SessionLocal() as db:
                 seed_database(db)
         except Exception as e:

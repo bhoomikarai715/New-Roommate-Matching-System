@@ -2,10 +2,10 @@ import contextlib
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.models.database import engine, Base, SessionLocal, init_db
-from backend.routes import auth, profile, matches, chat, agreement
-from backend.services.seeder import seed_database
-from backend.config import settings
+from server_app.models.database import engine, Base, SessionLocal, init_db
+from server_app.routes import auth, profile, matches, chat, agreement
+from server_app.services.seeder import seed_database
+from server_app.config import settings
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):

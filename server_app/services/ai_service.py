@@ -1,6 +1,6 @@
 import requests
 import json
-from backend.config import settings
+from server_app.config import settings
 
 def calculate_ai_compatibility(user_data: dict, candidate_data: dict) -> float:
     """

@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 1 week
 
+    OPENROUTER_API_KEY: str = "" # Provide via Env Var
+
     class Config:
         env_file = ".env"
 

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
-from fpdf import FPDF
 from datetime import datetime
 from backend.models.entities import User
 from backend.routes.auth import get_current_user
@@ -9,6 +8,11 @@ router = APIRouter(prefix="/api/agreement", tags=["agreement"])
 
 @router.get("/download")
 def download_agreement(current_user: User = Depends(get_current_user)):
+    try:
+        from fpdf import FPDF
+    except ImportError:
+        return Response(content="PDF Generation is unavailable in this environment.", status_code=400)
+        
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=16)

@@ -2,7 +2,7 @@ import contextlib
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.models.database import engine, Base, SessionLocal
+from backend.models.database import engine, Base, SessionLocal, init_db
 from backend.routes import auth, profile, matches, chat, agreement
 from backend.services.seeder import seed_database
 from backend.config import settings
@@ -11,12 +11,8 @@ from backend.config import settings
 async def lifespan(app: FastAPI):
     # Handle read-only filesystems in serverless environments (like Vercel)
     try:
-        # Startup: Create tables if they don't exist
-        Base.metadata.create_all(bind=engine)
-        
-        # Seed data
-        with SessionLocal() as db:
-            seed_database(db)
+        # Proper initialization sequence
+        init_db()
     except Exception as e:
         print(f"Skipping database init in serverless environment: {e}")
         

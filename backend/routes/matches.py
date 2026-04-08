@@ -26,11 +26,21 @@ def get_matches(
         
     candidates = query.all()
     
+    from backend.services.ai_service import calculate_ai_compatibility
+    
     matches = []
     for candidate in candidates:
-        score = calculate_compatibility(current_user, candidate)
-        # Convert candidate to a dict so we can inject the compatibility score
         candidate_dict = candidate.__dict__.copy()
+        if "_sa_instance_state" in candidate_dict:
+            del candidate_dict["_sa_instance_state"]
+            
+        # Try AI match if key is present
+        score = calculate_ai_compatibility(current_user.__dict__, candidate_dict)
+        
+        # Fallback to local matching if AI fails or no key
+        if score == 0:
+            score = calculate_compatibility(current_user, candidate)
+            
         candidate_dict['compatibility_score'] = score
         matches.append(candidate_dict)
         

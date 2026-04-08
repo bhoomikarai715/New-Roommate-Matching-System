@@ -30,22 +30,25 @@ engine = create_engine(
     poolclass=StaticPool if db_url == "sqlite:///:memory:" else None
 )
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+from backend.models.base import Base
 
-if "sqlite" in db_url and os.environ.get("VERCEL"):
-    try:
-        import backend.models.entities
-        Base.metadata.create_all(bind=engine)
-        
-        # Seed the database dynamically for the in-memory SQLite
-        from backend.services.seeder import seed_database
-        with SessionLocal() as db:
-            seed_database(db)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def init_db():
+    """Centralized database initialization, especially for Vercel's in-memory SQLite."""
+    if "sqlite" in db_url and os.environ.get("VERCEL"):
+        try:
+            # Import entities here to avoid circular imports and ensure tables are indexed
+            import backend.models.entities
+            Base.metadata.create_all(bind=engine)
             
-    except Exception as e:
-        print(f"Table creation or seeding failed: {e}")
-        pass
+            # Seed the database dynamically for the in-memory SQLite
+            from backend.services.seeder import seed_database
+            with SessionLocal() as db:
+                seed_database(db)
+        except Exception as e:
+            print(f"Table creation or seeding failed: {e}")
+
 
 def get_db():
     db = SessionLocal()

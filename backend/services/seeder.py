@@ -1,4 +1,4 @@
-import pandas as pd
+import csv
 import random
 import os
 from sqlalchemy.orm import Session
@@ -17,8 +17,6 @@ def seed_database(db: Session, csv_path: str = None):
         print(f"CSV not found at {csv_path}. Skipping seed.")
         return
 
-    df = pd.read_csv(csv_path)
-
     # Mapping dictionaries
     sleep_pattern_map = {"Night": "Night Owl (12-2 AM)", "Morning": "Morning (7-9 AM)", "Evening": "Evening (10-11 PM)"}
     profession_map = {"Developer": "Software Developer", "Supporting Staff": "Other", "Customer Support": "Other"}
@@ -28,26 +26,34 @@ def seed_database(db: Session, csv_path: str = None):
 
     records_to_insert = []
     
-    for _, row in df.iterrows():
-        mapped_sp = sleep_pattern_map.get(row.get("work_shift", ""), str(row.get("work_shift", "")))
-        mapped_prof = profession_map.get(row.get("profession", ""), str(row.get("profession", "")))
-        mapped_cln = cleanliness_map.get(row.get("cleanliness", ""), str(row.get("cleanliness", "")))
-        mapped_noise = noise_tol_map.get(row.get("noise_preference", ""), str(row.get("noise_preference", "")))
-        
-        record = RoommateRecord(
-            full_name=row.get("user_name"),
-            sleep_pattern=mapped_sp,
-            profession=mapped_prof,
-            personality=str(row.get("personality", "")),
-            cleanliness=mapped_cln,
-            noise_tolerance=mapped_noise,
-            bedtime=str(row.get("bedtime", "")),
-            wake_time=str(row.get("wake_time", "")),
-            sleep_type=str(row.get("sleep_type", "")),
-            social_energy_rating=int(row.get("social_energy_rating", 5) if pd.notna(row.get("social_energy_rating")) else 5),
-            room_preference=random.choice(room_prefs)
-        )
-        records_to_insert.append(record)
+    with open(csv_path, mode='r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            work_shift = row.get("work_shift", "")
+            profession = row.get("profession", "")
+            cleanliness = row.get("cleanliness", "")
+            noise_pref = row.get("noise_preference", "")
+            social_energy = row.get("social_energy_rating", "")
+            
+            try:
+                energy_val = int(social_energy)
+            except (ValueError, TypeError):
+                energy_val = 5
+
+            record = RoommateRecord(
+                full_name=row.get("user_name", ""),
+                sleep_pattern=sleep_pattern_map.get(work_shift, str(work_shift)),
+                profession=profession_map.get(profession, str(profession)),
+                personality=str(row.get("personality", "")),
+                cleanliness=cleanliness_map.get(cleanliness, str(cleanliness)),
+                noise_tolerance=noise_tol_map.get(noise_pref, str(noise_pref)),
+                bedtime=str(row.get("bedtime", "")),
+                wake_time=str(row.get("wake_time", "")),
+                sleep_type=str(row.get("sleep_type", "")),
+                social_energy_rating=energy_val,
+                room_preference=random.choice(room_prefs)
+            )
+            records_to_insert.append(record)
 
     db.add_all(records_to_insert)
     db.commit()

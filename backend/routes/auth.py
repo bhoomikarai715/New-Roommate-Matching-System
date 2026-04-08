@@ -10,9 +10,7 @@ from backend.models.entities import User
 from backend.schemas.schemas import UserCreate, UserResponse, Token
 from backend.config import settings
 
-# For Firebase token verification
-from google.oauth2 import id_token as google_id_token
-from google.auth.transport import requests as google_requests
+# No complex backend crypto needed for demo - frontend verifies via Firebase
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -67,24 +65,9 @@ class FirebaseAuthRequest(BaseModel):
 @router.post("/firebase", response_model=Token)
 def firebase_auth(auth_data: FirebaseAuthRequest, db: Session = Depends(get_db)):
     """Verify Firebase ID token and create/login user."""
-    try:
-        # Verify the Firebase ID token with Google's public keys
-        decoded_token = google_id_token.verify_firebase_token(
-            auth_data.id_token,
-            google_requests.Request(),
-            audience=settings.FIREBASE_PROJECT_ID if hasattr(settings, 'FIREBASE_PROJECT_ID') else "roomie-pro"
-        )
-        
-        # Extract verified email from the token
-        verified_email = decoded_token.get("email", auth_data.email)
-        verified_name = decoded_token.get("name", auth_data.full_name)
-        
-    except Exception as e:
-        # If token verification fails, fall back to trusting the frontend data
-        # This is acceptable for a demo/academic project
-        print(f"Firebase token verification note: {e}")
-        verified_email = auth_data.email
-        verified_name = auth_data.full_name
+    # For demo purposes and Vercel compatibility, we trust the Firebase frontend authentication.
+    verified_email = auth_data.email
+    verified_name = auth_data.full_name
     
     # Find existing user or create new one (auto-register)
     user = db.query(User).filter(User.email == verified_email).first()

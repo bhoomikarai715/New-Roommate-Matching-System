@@ -51,7 +51,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
     user = db.query(User).filter(User.email == email).first()
     if user is None:
-        raise credentials_exception
+        # Re-create the user in the in-memory DB dynamically to survive Vercel cold starts
+        user = User(full_name=email.split("@")[0], email=email, password_hash=None)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
     return user
 
 # ========== Firebase Google Sign-In Endpoint ==========

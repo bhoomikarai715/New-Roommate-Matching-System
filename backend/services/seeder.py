@@ -4,7 +4,11 @@ import os
 from sqlalchemy.orm import Session
 from backend.models.entities import RoommateRecord
 
-def seed_database(db: Session, csv_path: str = "backend/data/Girls_pg_hostel_CSV_data-1.csv"):
+def seed_database(db: Session, csv_path: str = None):
+    if csv_path is None:
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        csv_path = os.path.join(base_dir, "backend", "data", "Girls_pg_hostel_CSV_data-1.csv")
+        
     if db.query(RoommateRecord).first() is not None:
         # Already seeded
         return

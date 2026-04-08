@@ -13,13 +13,17 @@ if db_url.startswith("postgres://"):
 # Fix for Vercel Serverless environment (make SQLite writable)
 if "sqlite" in db_url and os.environ.get("VERCEL"):
     tmp_db_path = "/tmp/roomiematch.db"
+    
+    # Try to find the source DB using absolute path
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    source_db = os.path.join(base_dir, "roomiematch.db")
+    
     if not os.path.exists(tmp_db_path):
-        source_db = "roomiematch.db"
-        if not os.path.exists(source_db):
-            source_db = "./roomiematch.db"
         try:
-            shutil.copy2(source_db, tmp_db_path)
+            if os.path.exists(source_db):
+                shutil.copy2(source_db, tmp_db_path)
         except Exception as e:
+            print(f"Failed to copy DB: {e}")
             pass
     db_url = f"sqlite:///{tmp_db_path}"
 
@@ -30,6 +34,12 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+if "sqlite" in db_url and os.environ.get("VERCEL"):
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception:
+        pass
 
 def get_db():
     db = SessionLocal()
